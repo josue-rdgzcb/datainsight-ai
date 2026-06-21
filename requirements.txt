@@ -5,6 +5,7 @@ streamlit>=1.35.0
 pandas
 numpy
 scipy
+scikit-learn
 
 # Interactive Data Visualization & Graphics
 plotly
