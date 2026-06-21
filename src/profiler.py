@@ -321,16 +321,5 @@ def generate_data_summary(
                 f"It features a **mean of {v_mean}** and a **median of {v_med}** across its {target_info['unique_values']:,} unique values."
             )
 
-    # 4. Final analytical verdict and modeling readiness tracking
-    # Rule of Thumb: A dataset is suitable if completeness exceeds 80% and duplicate ratio is under 5%
-    if profile["completeness"] > 0.8 and profile["duplicates"] < 0.05 * profile["rows"]:
-        summary.append(
-            "**Verdict:** The dataset is in solid condition and appears **fully suitable** for immediate exploratory data analysis (EDA) and machine learning workflows."
-        )
-    else:
-        summary.append(
-            "**Verdict:** Initial signs indicate the dataset **requires preprocessing** (such as deduplication, imputation, or scaling) before proceeding to modeling."
-        )
-
     # Join the textual sequence tracks into a uniform markdown narrative structure
     return "\n\n".join(summary)
