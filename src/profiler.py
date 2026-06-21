@@ -5,19 +5,19 @@ Dataset profiling utilities.
 
 from typing import Any
 import pandas as pd
+import numpy as np
 
 
 
 # --------------------------------------------------
 # Dataset Profiling & Metadata Extraction Engines
 # --------------------------------------------------
-
 def profile_dataset(
     df: pd.DataFrame,
     target: str | None = None
 ) -> dict[str, Any]:
     """
-    Generate a complete profile of a dataset.
+    Generate an advanced, feature-rich profile of a dataset for LLM ingestion.
 
     Parameters
     ----------
@@ -30,7 +30,7 @@ def profile_dataset(
     Returns
     -------
     dict[str, Any]
-        Dataset profile information.
+        Comprehensive statistical and structural metadata payload.
     """
     # Calculate the absolute global volume of cells in the matrix
     total_cells = df.shape[0] * df.shape[1]
@@ -57,9 +57,16 @@ def profile_dataset(
         include="number"
     ).columns.tolist()
 
-    categorical_columns = df.select_dtypes(
-        exclude="number"
+    # Attempt to parse and isolate potential datetime tracks before text matching
+    datetime_columns = df.select_dtypes(
+        include=["datetime", "datetimetz"]
     ).columns.tolist()
+
+    # Extract object, boolean, and category types while excluding numeric/datetime signatures
+    categorical_columns = [
+        c for c in df.columns 
+        if c not in numerical_columns and c not in datetime_columns
+    ]
 
     # Calculate full RAM usage profile accounting for deep object strings
     memory_usage_mb = (
@@ -83,7 +90,53 @@ def profile_dataset(
         .to_dict()
     )
 
-    # Assemble the unified statistical metadata dictionary payload
+    # --- NEW ADVANCED METRICS FOR ENRICHED AI CONTEXT ---
+    
+    # Constant Columns Detection: Find features with zero variance (useless for ML algorithms)
+    constant_columns = [c for c in df.columns if df[c].nunique(dropna=True) == 1]
+
+    # High Cardinality Flags: Categorical features with over 20 unique values (overfitting risk)
+    high_cardinality_features = [
+        c for c in categorical_columns 
+        if df[c].nunique(dropna=True) > 20 and c != target
+    ]
+
+    # Interquartile Range (IQR) Outliers Detector (Evaluates numerical noise profiles)
+    total_outlier_rows = 0
+    if numerical_columns:
+        outlier_mask = pd.Series(False, index=df.index)
+        for col in numerical_columns:
+            if col == target:
+                continue
+            q1 = df[col].quantile(0.25)
+            q3 = df[col].quantile(0.75)
+            iqr = q3 - q1
+            if iqr > 0:
+                # Flag values that sit outside 1.5 times the IQR distance boundaries
+                outlier_mask |= (df[col] < (q1 - 1.5 * iqr)) | (df[col] > (q3 + 1.5 * iqr))
+        total_outlier_rows = int(outlier_mask.sum())
+
+    outliers_percentage = (total_outlier_rows / df.shape[0] * 100) if df.shape[0] > 0 else 0
+
+    # High Correlation Detection (Identifica multicolinealidad para la IA)
+    highly_correlated_pairs = []
+    if len(numerical_columns) >= 2:
+        # Calculamos la matriz absoluta para capturar tanto relaciones muy positivas como muy negativas
+        corr_matrix = df[numerical_columns].corr(numeric_only=True).abs()
+        
+        # Recorremos solo la mitad superior de la matriz para evitar duplicar pares (ej: var1-var2 y var2-var1)
+        upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+        
+        for col in upper_tri.columns:
+            # Buscamos coeficientes mayores o iguales a 0.70 (estándar de colinealidad fuerte)
+            high_corr_features = upper_tri[upper_tri[col] >= 0.70][col].index.tolist()
+            for feature in high_corr_features:
+                if col != target and feature != target: # Ignoramos el target aquí, nos interesan las independientes
+                    coef = df[col].corr(df[feature])
+                    highly_correlated_pairs.append(f"`{feature}` vs `{col}` (r = {coef:.2f})")
+
+
+    # Assemble the enriched statistical metadata dictionary payload
     profile = {
         "rows": int(df.shape[0]),
         "columns": int(df.shape[1]),
@@ -91,17 +144,25 @@ def profile_dataset(
         "memory_usage_mb": round(memory_usage_mb, 2),
         "numerical_columns_count": len(numerical_columns),
         "categorical_columns_count": len(categorical_columns),
+        "datetime_columns_count": len(datetime_columns),
         "numerical_columns": numerical_columns,
         "categorical_columns": categorical_columns,
+        "datetime_columns": datetime_columns,
+        "constant_columns": constant_columns,
+        "high_cardinality_categorical_columns": high_cardinality_features,
         "missing_cells": missing_cells,
         "missing_percentage": round(missing_percentage, 2),
         "completeness": round(completeness, 3),
         "top_missing_columns": top_missing_columns,
+        "outlier_rows_count": total_outlier_rows,
+        "outliers_percentage": round(outliers_percentage, 2),
+        "highly_correlated_features": highly_correlated_pairs, 
         # Evaluate target metadata contextually if the user selected a valid label
         "target_info": analyze_target(df, target) if target else None,
     }
 
     return profile
+
 
 
 # --------------------------------------------------
