@@ -1,16 +1,21 @@
-streamlit
+# Core Application Framework & Web UI
+streamlit>=1.35.0
 
+# Data Manipulation & Statistical Analytics
 pandas
 numpy
+scipy
 
+# Interactive Data Visualization & Graphics
+plotly
 matplotlib
 seaborn
-plotly
 
-openai
-
+# AI Engine & Environment Orchestration
+openai>=1.0.0
 python-dotenv
 
+# Document Generation & Export Utilities
 reportlab
 
 # Install all dependencies with: pip install -r requirements.txt
