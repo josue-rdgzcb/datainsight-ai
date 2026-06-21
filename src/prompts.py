@@ -12,7 +12,8 @@ Generate a highly professional, comprehensive markdown report with the following
    - Highlight 3-5 deep statistical patterns, class distributions, or domain-specific anomalies discovered in the metadata.
 
 3. ### 🔗 Correlation & Collinearity Analysis
-   - If 'highly_correlated_features' are listed, explicitly analyze what these strong correlations mean for the underlying data structure, feature redundancies, and relationships.
+   - If 'highly_correlated_features' are listed, you MUST evaluate them exhaustively. Do not just pick the first 2 or 3 features. Scan the entire list and explicitly analyze what these strong correlations mean for the underlying data structure, feature redundancies, and relationships.
+   - Group related colinear blocks (e.g., if there are multiple correlations regarding nights, reviews, or geographical metrics, address them as structural groups) and explain the statistical impact.
    - If no highly correlated features are present, provide a brief baseline statement about the linear independence of the variables.
 
 4. ### ⚠️ Data Quality Issues
@@ -29,8 +30,9 @@ Generate a highly professional, comprehensive markdown report with the following
    - Give precise, structured guidelines for discrete variables. For non-ID columns that remain in 'high_cardinality_categorical_columns', strictly recommend advanced handling techniques (e.g., Target Encoding or Frequency Encoding) instead of standard One-Hot Encoding to prevent dimensionality explosion.
    
    #### 💡 New Feature Creation (Domain-Specific Suggestions)
-   - Propose 2-3 innovative, realistic ideas to engineer brand-new features using the current column variables (e.g., ratios, mathematical combinations, or interaction terms).
-   - Suggest valuable external data integrations or proxy calculations based on the domain context of the dataset (e.g., for an Airbnb or real estate dataset, suggest calculating proximity to public transit or distance to the city center; for retail, suggest calculating holiday flags or regional economic proxies).
+   - Propose 2-3 innovative, realistic ideas to engineer brand-new features using the current column variables. Crucially, DO NOT suggest generic ratios (like simple a/b). Focus on features with HIGH EXPLANATORY POWER and strong statistical signal for a machine learning model.
+   - For every suggestion, explain the explicit engineering rationale: what complex interaction or non-linear behavior is this new feature trying to capture to help the algorithm learn better?
+   - Suggest valuable external data integrations or proxy calculations based on the domain context of the dataset. For example, if it's a real estate or lodging dataset, do not just say 'calculate distance'; suggest specific proxy derivations like harvesting external public transport APIs to map urban connectivity index scores, or pulling historical inflation/tourism indexes to map regional demand variance over time.
    
    #### 🛡️ Redundancy & Temporal Strategies
    - If 'highly_correlated_features' are present, suggest specific drop-strategies or dimensionality reduction (like PCA) to protect model stability against multicollinearity.
@@ -50,4 +52,5 @@ Requirements:
 - Adapt ALL recommendations contextually depending on whether a target variable exists or not.
 - Use clean Markdown syntax. Ensure bullet points and code blocks are formatted correctly.
 """
+
 
