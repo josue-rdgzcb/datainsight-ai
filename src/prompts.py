@@ -33,10 +33,6 @@ Generate a highly professional, comprehensive markdown report with the following
    - Propose 2-3 innovative, realistic ideas to engineer brand-new features using the current column variables. Crucially, DO NOT suggest generic ratios (like simple a/b). Focus on features with HIGH EXPLANATORY POWER and strong statistical signal for a machine learning model.
    - For every suggestion, explain the explicit engineering rationale: what complex interaction or non-linear behavior is this new feature trying to capture to help the algorithm learn better?
    - Suggest valuable external data integrations or proxy calculations based on the domain context of the dataset. For example, if it's a real estate or lodging dataset, do not just say 'calculate distance'; suggest specific proxy derivations like harvesting external public transport APIs to map urban connectivity index scores, or pulling historical inflation/tourism indexes to map regional demand variance over time.
-   
-   #### 🛡️ Redundancy & Temporal Strategies
-   - If 'highly_correlated_features' are present, suggest specific drop-strategies or dimensionality reduction (like PCA) to protect model stability against multicollinearity.
-   - If 'datetime_columns' are present, suggest date-part extraction strategies or rolling windows.
 
 6. ### 💻 Recommended Machine Learning Models
    - If a target variable exists, specify whether it is a Classification or Regression task. Recommend 2-3 specific algorithms.
