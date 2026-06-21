@@ -38,4 +38,3 @@ Requirements:
 - Adapt ALL recommendations contextually depending on whether a target variable exists or not.
 - Use clean Markdown syntax. Ensure bullet points and code blocks are formatted correctly.
 """
-
