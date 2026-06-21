@@ -175,7 +175,7 @@ if uploaded_file is not None:
         with col_msg1:
             st.success("Dataset uploaded successfully!", icon="✅")
         with col_msg2:
-            st.info("Please select a target variable or 'None' to generate the EDA and enable the AI analysis.", icon="💡")
+            st.info("Please select a target variable or 'None' to generate the automated EDA and enable the AI analysis.", icon="💡")
 
 
     # ----------------------------------------------
