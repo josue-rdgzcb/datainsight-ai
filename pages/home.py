@@ -219,9 +219,9 @@ if uploaded_file is not None:
         # Display the warning message if the target was modified after a report generation
         if st.session_state.get("target_changed_alert", False):
             st.warning(
-                "⚠️ **Cambio de Target detectado:** El análisis actual en la página de la IA corresponde "
-                "al target anterior. Por favor, presiona el botón **'✨ Analyze with AI'** de arriba si deseas "
-                "generar un nuevo reporte adaptado a esta variable.",
+                "⚠️ **Target change detected: The current analysis on the AI page corresponds "
+                "to the previous target. Please press the '✨ Analyze with AI' button above if you want to "
+                "generate a new report adapted to this variable.",
                 icon="🔄"
             )
 
