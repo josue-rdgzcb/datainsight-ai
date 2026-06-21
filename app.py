@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 1. Page Declarations: Pointing to the isolated subpage module files
+# Page Declarations: Pointing to the isolated subpage module files
 home_page = st.Page(
     "pages/home.py", 
     title="Data Explorer & Visualizations", 
@@ -25,10 +25,17 @@ ai_page = st.Page(
     icon="🧠"
 )
 
-# 2. Instantiate native Streamlit navigation controls matching the sidebar directory structure
-pg = st.navigation([home_page, ai_page])
+reports_page = st.Page(
+    "pages/reports.py",
+    title="Download Reports",
+    icon="📥"
+)
 
-# 3. Execute and dynamically render the subpage routing according to the user's focus
+
+# Instantiate native Streamlit navigation controls matching the sidebar directory structure
+pg = st.navigation([home_page, ai_page, reports_page])
+
+# Execute and dynamically render the subpage routing according to the user's focus
 pg.run()
 
 
