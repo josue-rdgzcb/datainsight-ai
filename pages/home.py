@@ -19,7 +19,6 @@ from src.visualizations import (
     generate_variable_summary_table,
     plot_target_correlations,
     plot_target_correlations_2,
-    plot_target_mutual_information
 )
 
 # --------------------------------------------------
