@@ -1,6 +1,5 @@
 """
-Home
-
+Home - Data Explorer
 """
 
 import streamlit as st
@@ -152,6 +151,10 @@ if uploaded_file is not None:
         st.session_state.target_selection_persistent = None  
         st.session_state.target_changed_alert = False 
         
+        # Clear specific document generation cache to lock down the export center buttons
+        st.session_state.profile_data_cache = None
+        st.session_state.summary_data_cache = None
+        
         if 'target_shared' in st.session_state:
             del st.session_state['target_shared']
             
@@ -181,6 +184,7 @@ if uploaded_file is not None:
     # ----------------------------------------------
     # Target selector 
     # ----------------------------------------------
+
     with st.container(border=True):
         st.markdown("#### 🎯 Target variable")
         
@@ -334,6 +338,10 @@ if uploaded_file is not None:
             profile
         )
 
+        # 🔥 PASO CLAVE: Guardamos los resultados en el baúl global para que la página de descargas los pueda leer
+        st.session_state.profile_data_cache = profile
+        st.session_state.summary_data_cache = summary
+
         # --- Data Overview Narrative Panel ---
         with st.container(border=True):
             st.markdown("#### 🗒️ Data Overview")
@@ -353,7 +361,6 @@ if uploaded_file is not None:
             st.dataframe(summary_table, use_container_width=True, hide_index=True)
 
 
-        
         # ----------------------------------------------
         # Visualizations (Organized in Tabs)
         # ----------------------------------------------
