@@ -5,12 +5,9 @@ streamlit>=1.35.0
 pandas
 numpy
 scipy
-scikit-learn
 
 # Interactive Data Visualization & Graphics
 plotly
-matplotlib
-seaborn
 
 # AI Engine & Environment Orchestration
 openai>=1.0.0
@@ -18,6 +15,7 @@ python-dotenv
 
 # Document Generation & Export Utilities
 reportlab
+markdown2
 
 # Install all dependencies with: pip install -r requirements.txt
 # Verify verify installation and versions with: python check_requirements.py
