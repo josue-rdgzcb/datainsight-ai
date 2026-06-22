@@ -57,10 +57,10 @@ else:
             if not eda_disabled:
                 # Build the EDA-only report including Target Analysis if a valid target is selected
                 eda_html = build_eda_only_report(
-                    df=df,
-                    profile=profile_data,
-                    summary_narrative=summary_data,
-                    selected_target=selected_target  # Pass the actual column name (e.g., 'median_income')
+                    df,
+                    profile_data,
+                    summary_data,
+                    selected_target
                 )
 
                 # Download button for the HTML report
