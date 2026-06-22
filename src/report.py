@@ -31,7 +31,7 @@ def build_eda_only_report(
     # Calculate full DataFrame memory footprint in Megabytes (MB)
     memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 ** 2)
 
-    # --- Intro en Markdown ---
+    # --- Markdown Intro Section ---
     md = [
         f"# DataInsight AI - Automated EDA Report\n",
         f"## 🔢 Dataset Metrics",
@@ -44,7 +44,7 @@ def build_eda_only_report(
     ]
     md_html = markdown2.markdown("\n".join(md))
 
-    # --- CSS global premium ---
+    # --- Global Premium CSS Styling ---
     style_block = """
     <style>
     body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', -apple-system, sans-serif; padding: 30px; line-height: 1.6; max-width: 1200px; margin: 0 auto; }
@@ -65,36 +65,41 @@ def build_eda_only_report(
     # --- Variables Summary Table ---
     summary_table = generate_variable_summary_table(df)
     
-    # Inicializamos el recolector interno de bloques HTML
+    # Initialize the internal HTML components storage array
     body_parts = [
         md_html,
         "<h2>📋 Variables Summary Table</h2>",
-        summary_table.to_html(index=False, classes="table") # Pasamos la clase limpia para que actúe nuestro CSS personalizado
+        summary_table.to_html(index=False, classes="table") # Pass clean class definitions for the custom CSS engine
     ]
+
+    # --- Performance Optimization Parameter Configuration ---
+    # Setting include_plotlyjs=False prevents injecting the heavy 3MB core engine into each individual chart.
+    # This keeps the output text size ultra-lightweight, preventing cloud container crashes and out-of-memory errors.
+    plotly_html_kwargs = {"full_html": False, "include_plotlyjs": False}
 
     # --- TAB 1: Distributions ---
     body_parts.append("<h2>📊 Distributions</h2>")
     fig_num = plot_numerical_distributions(df)
     if fig_num:
-        body_parts.append(pio.to_html(fig_num, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_num, **plotly_html_kwargs))
     fig_cat = plot_categorical_distributions(df)
     if fig_cat:
-        body_parts.append(pio.to_html(fig_cat, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_cat, **plotly_html_kwargs))
 
     # --- TAB 2: Quality & Structure ---
     body_parts.append("<h2>🔍 Quality & Structure</h2>")
     fig_missing = plot_missing_values(df)
     if fig_missing:
-        body_parts.append(pio.to_html(fig_missing, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_missing, **plotly_html_kwargs))
     fig_card = plot_categorical_cardinality(df)
     if fig_card:
-        body_parts.append(pio.to_html(fig_card, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_card, **plotly_html_kwargs))
 
     # --- TAB 3: Data Relations ---
     body_parts.append("<h2>🔗 Data Relations</h2>")
     fig_corr = plot_correlation_heatmap(df)
     if fig_corr:
-        body_parts.append(pio.to_html(fig_corr, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_corr, **plotly_html_kwargs))
         
     # --- TAB 4: Target Analysis (Conditional Section) ---
     if selected_target and selected_target in df.columns:
@@ -102,24 +107,26 @@ def build_eda_only_report(
         
         fig_target = plot_target_distribution(df, selected_target)
         if fig_target:
-            body_parts.append(pio.to_html(fig_target, full_html=False, include_plotlyjs="cdn"))
+            body_parts.append(pio.to_html(fig_target, **plotly_html_kwargs))
             
         fig_target_corr = plot_target_correlations(df, selected_target)
         if fig_target_corr:
-            body_parts.append(pio.to_html(fig_target_corr, full_html=False, include_plotlyjs="cdn"))
+            body_parts.append(pio.to_html(fig_target_corr, **plotly_html_kwargs))
     else:
         body_parts.append("<h2>🎯 Target Analysis</h2><p><i>No target variable was selected for this analytical execution run.</i></p>")
 
-    # Unificamos el cuerpo del reporte
+    # Unify all individual HTML parts into a single text body blocks layout
     inner_body_html = "\n".join(body_parts)
 
-    # 4. Envolvemos de manera síncrona dentro del esqueleto web oficial estandarizado
+    # Wrap up all elements synchronously inside the official standardized web frame skeleton.
+    # The Plotly CDN script is injected globally once here in the header to handle all plots safely.
     full_html_document = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DataInsight AI - Automated EDA Report</title>
+    <script src="https://plot.ly"></script>
     {style_block}
 </head>
 <body>
@@ -129,6 +136,7 @@ def build_eda_only_report(
 """
 
     return full_html_document
+
 
 
 # --------------------------------------------------
