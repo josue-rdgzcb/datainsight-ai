@@ -15,8 +15,8 @@ from src.report import (
 if st.button("⬅️ Back to Home", type="secondary"):
     st.switch_page("pages/home.py")
 
-st.markdown("# 📥 Executive Document Export Center")
-st.write("Download tailored offline Markdown (.md) documents featuring your custom data summaries and AI pipelines.")
+st.markdown("# 📥 Report Export Center")
+st.write("Download tailored offline HTML (.html) documents featuring your custom data summaries and predictive modeling strategies.")
 
 # Check state matrices from previous workflows
 has_df = "df_shared" in st.session_state and st.session_state.df_shared is not None
@@ -37,19 +37,33 @@ else:
     ai_report_data = st.session_state.get("ai_report_output")
 
     st.markdown("---")
-    
+
     # ------------------------------------------------------------------
     # BUTTON 1: Automated EDA Only Export (HTML)
     # ------------------------------------------------------------------
     with st.container(border=True):
         col_btn1, col_txt1 = st.columns([1.2, 2.0], vertical_alignment="center")
         with col_btn1:
+            # Disable button if EDA summaries are not available
             eda_disabled = not (has_eda and profile_data and summary_data)
-            
-            if not eda_disabled:
-                eda_md = build_eda_only_report(df, profile_data, summary_data)
-                eda_html = export_report_to_html(eda_md)
 
+            # Read the persistent variable written by the target selector in real time
+            selected_target = st.session_state.get("target_selection_persistent")
+
+            # If the user selected "None" in the interface, normalize it to Python None
+            if selected_target == "None":
+                selected_target = None
+
+            if not eda_disabled:
+                # Build the EDA-only report including Target Analysis if a valid target is selected
+                eda_html = build_eda_only_report(
+                    df=df,
+                    profile=profile_data,
+                    summary_narrative=summary_data,
+                    selected_target=selected_target  # Pass the actual column name (e.g., 'median_income')
+                )
+
+                # Download button for the HTML report
                 st.download_button(
                     label="📥 Download Automated EDA (.html)",
                     data=eda_html,
@@ -59,15 +73,26 @@ else:
                     key="download_eda_html_btn"
                 )
             else:
-                st.button("📥 Download Automated EDA (.html)", disabled=True, use_container_width=True, key="disabled_eda_html_btn")
-                
+                # Disabled button when EDA is not ready
+                st.button(
+                    "📥 Download Automated EDA (.html)",
+                    disabled=True,
+                    use_container_width=True,
+                    key="disabled_eda_html_btn"
+                )
+
         with col_txt1:
             if eda_disabled:
-                st.caption("🔒 *Locked: Select a target variable or 'None' on the Home page to unlock the automated EDA download.*")
+                # Caption shown when the button is locked
+                st.caption(
+                    "🔒 *Locked: Select a target variable or 'None' on the Home page to unlock the automated EDA download.*"
+                )
             else:
-                st.info("✅ **Ready:** Contains row/column metrics, data profiling statistics, and the text data overview.", icon="📊")
-
-
+                # Info message shown when the report is ready
+                st.info(
+                    "✅ **Ready:** Contains metrics, profiling statistics, summary table, and interactive Plotly visualizations (including Target Analysis if selected).",
+                    icon="📊"
+                )
 
     # ------------------------------------------------------------------
     # BUTTON 2: OpenAI Analysis Only Export (HTML)
@@ -97,7 +122,7 @@ else:
             if ai_disabled:
                 st.caption("🔒 *Locked: Provide your OpenAI API Key and trigger 'Analyze with AI' to unlock this strategic report.*")
             else:
-                st.info("✅ **Ready:** Contains custom data-quality alerts, feature engineering suggestions, and Scikit-Learn code scripts.", icon="🧠")
+                st.info("✅ **Ready:** Contains custom data insights, data quality issues,  feature engineering suggestions, and recommended models", icon="🧠")
 
 
     # ------------------------------------------------------------------
