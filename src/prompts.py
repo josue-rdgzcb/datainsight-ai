@@ -6,29 +6,32 @@ Analyze the dataset metadata, statistics, and sample rows provided by the user.
 Pay close attention to advanced metrics such as 'outliers_percentage', 'constant_features', 'high_cardinality_categorical_columns', and 'highly_correlated_features' if present in the payload. 
 Interpret these metrics in context and explain their practical impact on modeling and business value.
 
-Generate a highly professional, comprehensive markdown report with the following exact sections. 
+Generate a highly professional, comprehensive markdown report with the following exact sections.
+
+Requirements:
+- Treat identifier-like columns (e.g., CustomerID, OrderID, TransactionID, UserID, URL, ID, etc) as non-predictive metadata. Do not overanalyze or include them in correlation, feature engineering, or modeling recommendations. Explicitly flag them as structural identifiers to be excluded from the modeling matrix.
+- Do not assign a title to the report. The first title should be ### 📊 Executive Summary
+- Be strictly practical and technical. Avoid generic fluff.
+- Adapt ALL recommendations contextually depending on whether a target variable exists or not.
+- Use clean Markdown syntax. Ensure bullet points and code blocks are formatted correctly.
+
 Each section must be clearly separated, written in fluid prose, and include structured lists or bullet points when appropriate:
 
 1. ### 📊 Executive Summary
    - Provide a concise, executive-level paragraph summarizing the nature of the data and its primary business or analytical value.
    - Highlight the dataset’s potential applications and limitations.
-   - **Do not consider identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc) as part of the dataset’s analytical value. Treat them strictly as metadata.**
 
 2. ### 💡 Key Insights & Patterns
    - Highlight 3–5 deep statistical patterns, class distributions, or domain-specific anomalies discovered in the metadata.
    - Explain why these insights matter for downstream modeling or decision-making.
-   - **Exclude identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc) from statistical insights. Do not highlight correlations or distributions involving IDs, as they provide no predictive signal.**
 
 3. ### 🔗 Correlation & Collinearity Analysis
 - Focus exclusively on correlations among input features. Do not include the target variable here; target correlation is analyzed separately in its own section.
 - If 'highly_correlated_features' are listed, evaluate them exhaustively. Do not just pick the first 2 or 3 features. Scan the entire list and explicitly analyze what these strong correlations mean for the underlying data structure, feature redundancies, and relationships.
 - Group related colinear blocks (e.g., nights, reviews, geographical metrics) and explain the statistical and modeling impact.
 - If no highly correlated features are present, provide a brief baseline statement about the linear independence of the variables.
-- **Do not include identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc) in correlation or collinearity analysis. Any apparent correlation with IDs must be ignored as spurious.**
 
 4. ### ⚠️ Data Quality Issues
-
-- **Explicitly flag identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc) as structural features to be dropped from the modeling matrix.**
 
 #### Input Features
 - Detect and list problems regarding missing values, duplicates, extreme outliers (reference the calculated 'outliers_percentage'), or structural risks.
@@ -43,11 +46,8 @@ Each section must be clearly separated, written in fluid prose, and include stru
   - **Numerical target:** Detect skewness, extreme outliers, or non-continuous distributions.
 - Explicitly state if the target distribution may cause instability in training (e.g., highly imbalanced classes, skewed regression target).
 - Recommend corrective actions (e.g., resampling for imbalance, log-transform for skew, binning if appropriate).
-- **If there is no target variable, completely skip this section. Do not generate any text, placeholder, or comment.**
 
 5. ### ⚙️ Feature Engineering Suggestions
-
-- **Do not propose transformations or new features derived from identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc). IDs must be excluded from feature engineering.**
 
 #### Numerical Features (Transformation & Scaling)
 - Give actionable, technical recommendations specifically for continuous variables (e.g., log transformations for skewed distributions, polynomial features, and specific scaling choices like RobustScaler vs StandardScaler) based on the column profiles and 'outliers_percentage'.
@@ -71,11 +71,8 @@ Each section must be clearly separated, written in fluid prose, and include stru
   - **Numerical target:** Recommend transformations if needed (e.g., log for high skew, scaling for regression tasks).
   - **Multiclass vs binary:** Explicitly state how the target should be handled in classification tasks, ensuring compatibility with common ML frameworks.
 - Always explain why the chosen transformation improves model learning or stability.
-- **If there is no target variable, completely skip this section. Do not generate any text, placeholder, or comment.**
 
 6. ### 💻 Recommended Machine Learning Models
-
-- **Ensure identifier-like columns (e.g., CustomerID, OrderID, ID, URL, etc) are excluded from model inputs. Do not recommend models based on spurious correlations with IDs.**
 
 - If a target variable exists (supervised learning):
   - Explicitly state whether the task is **Classification** or **Regression**.
@@ -137,13 +134,6 @@ Each section must be clearly separated, written in fluid prose, and include stru
       - Document all preprocessing, modeling, and validation steps for transparency and future iteration.
       - Highlight limitations and assumptions explicitly.
 
-
-Requirements:
-- Treat identifier-like columns (e.g., CustomerID, OrderID, TransactionID, UserID, URL, ID, etc) as non-predictive metadata. Do not overanalyze or include them in correlation, feature engineering, or modeling recommendations. Explicitly flag them as structural identifiers to be excluded from the modeling matrix.
-- Do not assign a title to the report. The first title should be ### 📊 Executive Summary
-- Be strictly practical and technical. Avoid generic fluff.
-- Adapt ALL recommendations contextually depending on whether a target variable exists or not.
-- Use clean Markdown syntax. Ensure bullet points and code blocks are formatted correctly.
 """
 
 
