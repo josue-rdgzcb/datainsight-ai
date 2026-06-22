@@ -191,3 +191,13 @@ def build_full_report(
     ]
 
     return "\n".join(combined_html)
+
+# --------------------------------------------------
+# HTML Report Export Helper
+# --------------------------------------------------
+
+def export_report_to_html(md_content: str) -> str:
+    """
+    Convert Markdown content into HTML string.
+    """
+    return markdown2.markdown(md_content)
