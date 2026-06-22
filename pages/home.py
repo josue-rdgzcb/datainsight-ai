@@ -52,7 +52,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.write("Upload a CSV dataset to perform an **automated exploratory analysis** and generate deep **predictive engineering insights powered by AI**.")
+st.write("Upload a CSV dataset to perform an **automated exploratory analysis** and generate **predictive engineering insights powered by AI**.")
 
 # --------------------------------------------------
 # Main layout - Top Section
@@ -338,7 +338,7 @@ if uploaded_file is not None:
             profile
         )
 
-        # 🔥 PASO CLAVE: Guardamos los resultados en el baúl global para que la página de descargas los pueda leer
+        # Save the results to the global archive so the downloads page can read them
         st.session_state.profile_data_cache = profile
         st.session_state.summary_data_cache = summary
 
