@@ -124,7 +124,6 @@ else:
             else:
                 st.info("✅ **Ready:** Contains custom data insights, data quality issues,  feature engineering suggestions, and recommended models", icon="🧠")
 
-
     # ------------------------------------------------------------------
     # BUTTON 3: Full Executive Report Export (EDA + AI) - HTML
     # ------------------------------------------------------------------
@@ -134,9 +133,21 @@ else:
             # Active ONLY if BOTH workflows are fully completed in the memory track
             full_disabled = not (has_eda and has_ai and profile_data and summary_data)
             
+            # Extract the persistent variable written by the target selector in real-time
+            selected_target = st.session_state.get("target_selection_persistent")
+            if selected_target == "None":
+                selected_target = None
+
             if not full_disabled:
-                full_md = build_full_report(df, profile_data, summary_data, ai_report_data)
-                full_html = export_report_to_html(full_md)  # Convert Markdown → HTML
+                # 🔥 CORRECCIÓN: Pasamos los argumentos por posición incluyendo el selected_target al final
+                # La función ahora genera el HTML maestro unificado de forma directa
+                full_html = build_full_report(
+                    df, 
+                    profile_data, 
+                    summary_data, 
+                    ai_report_data,
+                    selected_target
+                )
 
                 st.download_button(
                     label="📥 Download Full Executive Report (.html)",
@@ -147,11 +158,17 @@ else:
                     key="download_full_html_btn"
                 )
             else:
-                st.button("📥 Download Full Executive Report (.html)", disabled=True, use_container_width=True, key="disabled_full_html_btn")
+                st.button(
+                    "📥 Download Full Executive Report (.html)", 
+                    disabled=True, 
+                    use_container_width=True, 
+                    key="disabled_full_html_btn"
+                )
                 
         with col_txt3:
             if full_disabled:
                 st.caption("🔒 *Locked: Requires both a generated Automated EDA and a completed OpenAI execution session.*")
             else:
                 st.success("✨ **Fully Unlocked:** Merges both frameworks into one unified master analytical document.", icon="🏆")
+
 
