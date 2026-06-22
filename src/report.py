@@ -197,10 +197,20 @@ def build_full_report(
     # Calculate full DataFrame memory footprint in Megabytes (MB)
     memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 ** 2)
 
-    # 1. --- PARTE A: Compilamos la Introducción y Métricas del EDA ---
+    # CANDADO DE OPTIMIZACIÓN COMPORTAMIENTO BIG DATA:
+    # Si el dataset supera las 1,000 filas, tomamos una muestra representativa para el reporte HTML.
+    # Esto evita archivos gigantescos que congelen el navegador o corten la descarga.
+    if df.shape[0] > 1000:
+        # Tomamos una muestra aleatoria con semilla fija para asegurar reproducibilidad
+        df_plots = df.sample(n=1000, random_state=42)
+    else:
+        df_plots = df.copy()
+
+    # --- PARTE A: Compilamos la Introducción y Métricas del EDA ---
+    # (¡IMPORTANTE! Las métricas macro del documento deben mostrar el tamaño REAL del archivo completo)
     eda_md = [
         f"## 🔢 Dataset Metrics",
-        f"- **Total Rows:** {df.shape[0]:,}",
+        f"- **Total Rows (Full Dataset):** {df.shape[0]:,}",
         f"- **Total Columns:** {df.shape[1]}",
         f"- **Duplicate Records:** {profile['duplicates']:,}",
         f"- **Memory Footprint:** {memory_usage_mb:.2f} MB\n",
@@ -209,10 +219,9 @@ def build_full_report(
     ]
     eda_md_html = markdown2.markdown("\n".join(eda_md))
 
-    # Generamos la tabla estructurada de variables
+    # Generamos la tabla estructurada de variables usando el df completo
     summary_table = generate_variable_summary_table(df)
     
-    # Inicializamos la recolección del cuerpo unificado
     html_body_parts = [
         "<h1>📊 DataInsight AI - Full Executive Analytics Report</h1>",
         "<hr style='border: 0; border-top: 2px solid #0b61a4; margin-bottom: 30px;'>",
@@ -222,45 +231,44 @@ def build_full_report(
         summary_table.to_html(index=False, classes="table")
     ]
 
-    # Inyectamos de manera secuencial los gráficos del EDA
+    # Pasamos 'df_plots' (la muestra optimizada) en lugar de 'df' masivo a los gráficos
     html_body_parts.append("<h3>📊 Distributions</h3>")
-    fig_num = plot_numerical_distributions(df)
+    fig_num = plot_numerical_distributions(df_plots)
     if fig_num:
         html_body_parts.append(pio.to_html(fig_num, full_html=False, include_plotlyjs="cdn"))
-    fig_cat = plot_categorical_distributions(df)
+    fig_cat = plot_categorical_distributions(df_plots)
     if fig_cat:
         html_body_parts.append(pio.to_html(fig_cat, full_html=False, include_plotlyjs="cdn"))
 
     html_body_parts.append("<h3>🔍 Quality & Structure</h3>")
-    fig_missing = plot_missing_values(df)
+    fig_missing = plot_missing_values(df_plots)
     if fig_missing:
         html_body_parts.append(pio.to_html(fig_missing, full_html=False, include_plotlyjs="cdn"))
-    fig_card = plot_categorical_cardinality(df)
+    fig_card = plot_categorical_cardinality(df_plots)
     if fig_card:
         html_body_parts.append(pio.to_html(fig_card, full_html=False, include_plotlyjs="cdn"))
 
     html_body_parts.append("<h3>🔗 Data Relations</h3>")
-    fig_corr = plot_correlation_heatmap(df)
+    fig_corr = plot_correlation_heatmap(df_plots)
     if fig_corr:
         html_body_parts.append(pio.to_html(fig_corr, full_html=False, include_plotlyjs="cdn"))
         
-    # Agregamos la analítica condicional del target si aplica
-    if selected_target and selected_target in df.columns:
+    # Agregamos la analítica condicional del target usando la muestra optimizada
+    if selected_target and selected_target in df_plots.columns:
         html_body_parts.append(f"<h3>🎯 Target Analysis: {selected_target}</h3>")
-        fig_target = plot_target_distribution(df, selected_target)
+        fig_target = plot_target_distribution(df_plots, selected_target)
         if fig_target:
             html_body_parts.append(pio.to_html(fig_target, full_html=False, include_plotlyjs="cdn"))
-        fig_target_corr = plot_target_correlations(df, selected_target)
+        fig_target_corr = plot_target_correlations(df_plots, selected_target)
         if fig_target_corr:
             html_body_parts.append(pio.to_html(fig_target_corr, full_html=False, include_plotlyjs="cdn"))
     else:
         html_body_parts.append("<h3>🎯 Target Analysis</h3><p><i>No target variable was selected for this analytical execution run.</i></p>")
 
-    # 2. --- PARTE B: Compilamos las Respuestas de la Inteligencia Artificial ---
+    # --- PARTE B: Compilamos las Respuestas de la Inteligencia Artificial ---
     html_body_parts.append("<hr style='border: 0; border-top: 2px solid #0b61a4; margin-top: 50px; margin-bottom: 30px;'>")
     html_body_parts.append("<h2>🤖 Section 2: OpenAI Predictive Modeling Strategy</h2>")
     
-    # Traducimos las recomendaciones de la IA de Markdown a componentes HTML nativos
     ai_md_html = markdown2.markdown(ai_report)
     html_body_parts.append(ai_md_html)
 
