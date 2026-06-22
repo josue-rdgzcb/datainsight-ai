@@ -38,5 +38,25 @@ pg = st.navigation([home_page, ai_page, reports_page])
 # Execute and dynamically render the subpage routing according to the user's focus
 pg.run()
 
+# --------------------------------------------------
+# Global Footer Signature (Sidebar Bottom)
+# --------------------------------------------------
+with st.sidebar:
+    st.markdown("---") 
+    st.markdown(
+        """
+        <div style="text-align: center; color: #64748B; font-size: 13px; font-weight: 500;">
+            Developed by Josué Rodríguez
+            <div style="margin-top: 6px;">
+                <a href="https://github.com/josue-rdgzcb" target="_blank" style="color: #0b61a4; font-weight: 700; text-decoration: underline;">
+                    🔗 GitHub
+                </a>
+            </div>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
+
 
 
