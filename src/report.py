@@ -18,9 +18,6 @@ from src.visualizations import (
 # EDA-Only Report Builder
 # --------------------------------------------------
 
-import markdown2
-import plotly.io as pio
-
 def build_eda_only_report(
     df: pd.DataFrame,
     profile: dict,
@@ -28,10 +25,10 @@ def build_eda_only_report(
     selected_target: str | None = None
 ) -> str:
     """
-    Build an EDA-only report.
-    Combines Markdown intro with HTML summary table and Plotly visualizations.
+    Build an EDA-only report wrapped in a valid structured HTML skeleton.
+    Combines Markdown intro with an HTML summary table and interactive Plotly visualizations.
     """
-
+    # Calculate full DataFrame memory footprint in Megabytes (MB)
     memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 ** 2)
 
     # --- Intro en Markdown ---
@@ -47,69 +44,91 @@ def build_eda_only_report(
     ]
     md_html = markdown2.markdown("\n".join(md))
 
-    # --- CSS global ---
+    # --- CSS global premium ---
     style_block = """
     <style>
-    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', sans-serif; }
-    .plotly-graph-div { background-color: #f5f5f5 !important; }
-    h1, h2, h3 { color: #0b61a4; }
+    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', -apple-system, sans-serif; padding: 30px; line-height: 1.6; max-width: 1200px; margin: 0 auto; }
+    .plotly-graph-div { background-color: #f5f5f5 !important; margin-bottom: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    h1, h2, h3 { color: #0b61a4; margin-top: 25px; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    
+    /* Elegant Pandas Summary Table Styling */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; margin-bottom: 30px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
+    th { background-color: #0b61a4; color: #ffffff; padding: 12px 16px; font-weight: 600; text-align: left; font-size: 14px; }
+    td { padding: 12px 16px; border-bottom: 1px solid #edf2f7; color: #4a5568; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) { background-color: #f8fafc; }
     </style>
     """
 
     # --- Variables Summary Table ---
     summary_table = generate_variable_summary_table(df)
-    html_parts = [
-        style_block,
+    
+    # Inicializamos el recolector interno de bloques HTML
+    body_parts = [
         md_html,
         "<h2>📋 Variables Summary Table</h2>",
-        summary_table.to_html(index=False, classes="table table-striped")
+        summary_table.to_html(index=False, classes="table") # Pasamos la clase limpia para que actúe nuestro CSS personalizado
     ]
 
     # --- TAB 1: Distributions ---
-    html_parts.append("<h2>📊 Distributions</h2>")
+    body_parts.append("<h2>📊 Distributions</h2>")
     fig_num = plot_numerical_distributions(df)
     if fig_num:
-        html_parts.append(pio.to_html(fig_num, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_num, full_html=False, include_plotlyjs="cdn"))
     fig_cat = plot_categorical_distributions(df)
     if fig_cat:
-        html_parts.append(pio.to_html(fig_cat, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_cat, full_html=False, include_plotlyjs="cdn"))
 
     # --- TAB 2: Quality & Structure ---
-    html_parts.append("<h2>🔍 Quality & Structure</h2>")
+    body_parts.append("<h2>🔍 Quality & Structure</h2>")
     fig_missing = plot_missing_values(df)
     if fig_missing:
-        html_parts.append(pio.to_html(fig_missing, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_missing, full_html=False, include_plotlyjs="cdn"))
     fig_card = plot_categorical_cardinality(df)
     if fig_card:
-        html_parts.append(pio.to_html(fig_card, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_card, full_html=False, include_plotlyjs="cdn"))
 
     # --- TAB 3: Data Relations ---
-    html_parts.append("<h2>🔗 Data Relations</h2>")
+    body_parts.append("<h2>🔗 Data Relations</h2>")
     fig_corr = plot_correlation_heatmap(df)
     if fig_corr:
-        html_parts.append(pio.to_html(fig_corr, full_html=False, include_plotlyjs="cdn"))
+        body_parts.append(pio.to_html(fig_corr, full_html=False, include_plotlyjs="cdn"))
         
     # --- TAB 4: Target Analysis (Conditional Section) ---
-    # Render the target metrics only if a valid string is provided and exists as a dataframe feature
     if selected_target and selected_target in df.columns:
-        html_parts.append(f"<h2>🎯 Target Analysis: {selected_target}</h2>")
+        body_parts.append(f"<h2>🎯 Target Analysis: {selected_target}</h2>")
         
-        # Extract and append the isolated target classification/regression distribution chart
         fig_target = plot_target_distribution(df, selected_target)
         if fig_target:
-            html_parts.append(pio.to_html(fig_target, full_html=False, include_plotlyjs="cdn"))
+            body_parts.append(pio.to_html(fig_target, full_html=False, include_plotlyjs="cdn"))
             
-        # Extract and append the ANOVA/Chi-Square predictive feature power chart
         fig_target_corr = plot_target_correlations(df, selected_target)
         if fig_target_corr:
-            html_parts.append(pio.to_html(fig_target_corr, full_html=False, include_plotlyjs="cdn"))
+            body_parts.append(pio.to_html(fig_target_corr, full_html=False, include_plotlyjs="cdn"))
     else:
-        # Fallback tracking if the user explicitly chose 'None' or did an unsupervised execution run
-        html_parts.append("<h2>🎯 Target Analysis</h2><p><i>No target variable was selected for this analytical execution run.</i></p>")
+        body_parts.append("<h2>🎯 Target Analysis</h2><p><i>No target variable was selected for this analytical execution run.</i></p>")
 
-    # Merge the structural HTML array blocks into a single uniform web document stream
-    return "\n".join(html_parts)
+    # Unificamos el cuerpo del reporte
+    inner_body_html = "\n".join(body_parts)
 
+    # 4. Envolvemos de manera síncrona dentro del esqueleto web oficial estandarizado
+    full_html_document = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataInsight AI - Automated EDA Report</title>
+    {style_block}
+</head>
+<body>
+    {inner_body_html}
+</body>
+</html>
+"""
+
+    return full_html_document
 
 
 # --------------------------------------------------
