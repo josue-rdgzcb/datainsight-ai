@@ -121,35 +121,6 @@ def build_ai_only_report(ai_report: str) -> str:
     Build an AI-only report.
     Assembles OpenAI insights and predictive modeling strategies into HTML.
     """
-    style_block = """
-    <style>
-    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', sans-serif; }
-    .plotly-graph-div { background-color: #f5f5f5 !important; }
-    h1, h2, h3 { color: #0b61a4; }
-    </style>
-    """
-
-    md = [
-        f"# DataInsight AI - OpenAI Predictive Modeling Strategy\n",
-        ai_report
-    ]
-    md_html = markdown2.markdown("\n".join(md))  # convierte Markdown a HTML
-
-    return "\n".join([style_block, md_html])
-
-
-# --------------------------------------------------
-# Full Executive Report Builder
-# --------------------------------------------------
-
-def build_full_report(df: pd.DataFrame, profile: dict, summary_narrative: str, ai_report: str) -> str:
-    """
-    Build a full report.
-    
-    Combines both EDA metrics and OpenAI insights into a comprehensive Markdown document.
-    Includes dataset metrics, statistical overview, and predictive ML strategies.
-    """
-    memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 ** 2)
 
     style_block = """
     <style>
@@ -160,28 +131,63 @@ def build_full_report(df: pd.DataFrame, profile: dict, summary_narrative: str, a
     """
 
     md = [
-        f"# DataInsight AI - Full Executive Analytics Report\n",
-        f"## 🔢 Dataset Metrics",
-        f"- **Total Rows:** {df.shape[0]:,}",
-        f"- **Total Columns:** {df.shape[1]}",
-        f"- **Duplicate Records:** {profile['duplicates']:,}",
-        f"- **Memory Footprint:** {memory_usage_mb:.2f} MB\n",
-        f"## 📊 Statistical Data Overview",
-        summary_narrative,
-        f"\n## 🧠 OpenAI Insights & ML Strategy",
+        "# DataInsight AI - OpenAI Predictive Modeling Strategy\n",
         ai_report
     ]
-
     md_html = markdown2.markdown("\n".join(md))
 
-    return "\n".join([style_block, md_html])
+    # ✅ Ensure CSS is injected first
+    html_parts = [
+        style_block,
+        md_html
+    ]
 
-# --------------------------------------------------
-# HTML Report Export Helper
-# --------------------------------------------------
+    return "\n".join(html_parts)
 
-def export_report_to_html(md_content: str) -> str:
+
+
+def build_full_report(
+    df: pd.DataFrame,
+    profile: dict,
+    summary_narrative: str,
+    ai_report: str,
+    selected_target: str | None = None
+) -> str:
     """
-    Convert Markdown content into HTML string.
+    Build a full executive report combining EDA and AI insights.
+    Merges both HTML outputs into one unified document.
     """
-    return markdown2.markdown(md_content)
+
+    # --- CSS global (reutilizado) ---
+    style_block = """
+    <style>
+    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', sans-serif; }
+    .plotly-graph-div { background-color: #f5f5f5 !important; }
+    h1, h2, h3 { color: #0b61a4; }
+    </style>
+    """
+
+    # --- Sección EDA ---
+    eda_html = build_eda_only_report(
+        df=df,
+        profile=profile,
+        summary_narrative=summary_narrative,
+        selected_target=selected_target
+    )
+
+    # --- Sección AI ---
+    ai_html = build_ai_only_report(ai_report)
+
+    # --- Combinar ambas partes ---
+    combined_html = [
+        style_block,
+        "<h1>📊 DataInsight AI - Full Executive Report</h1>",
+        "<hr>",
+        "<h2>🔍 Exploratory Data Analysis</h2>",
+        eda_html,
+        "<hr>",
+        "<h2>🤖 AI Insights & Predictive Modeling</h2>",
+        ai_html
+    ]
+
+    return "\n".join(combined_html)
