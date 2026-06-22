@@ -119,30 +119,46 @@ def build_eda_only_report(
 def build_ai_only_report(ai_report: str) -> str:
     """
     Build an AI-only report.
-    Assembles OpenAI insights and predictive modeling strategies into HTML.
+    Assembles OpenAI insights and predictive modeling strategies into a fully structured HTML document.
     """
 
+    # 1. Definimos el bloque de estilos CSS limpio
     style_block = """
     <style>
-    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #f5f5f5; color: #222; font-family: 'Segoe UI', sans-serif; padding: 20px; line-height: 1.6; }
     .plotly-graph-div { background-color: #f5f5f5 !important; }
-    h1, h2, h3 { color: #0b61a4; }
+    h1, h2, h3 { color: #0b61a4; margin-top: 20px; }
+    ul, ol { padding-left: 20px; }
+    li { margin-bottom: 5px; }
+    pre { background-color: #e2e8f0; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    code { font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; }
     </style>
     """
 
-    md = [
+    # 2. Compilamos el cuerpo del reporte desde Markdown a HTML puro
+    md_content = [
         "# DataInsight AI - OpenAI Predictive Modeling Strategy\n",
         ai_report
     ]
-    md_html = markdown2.markdown("\n".join(md))
+    md_html = markdown2.markdown("\n".join(md_content))
 
-    # ✅ Ensure CSS is injected first
-    html_parts = [
-        style_block,
-        md_html
-    ]
+    # 3. Ensamblamos la estructura oficial de una página web autoejecutable
+    full_html_document = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataInsight AI - Report</title>
+    {style_block}
+</head>
+<body>
+    {md_html}
+</body>
+</html>
+"""
 
-    return "\n".join(html_parts)
+    return full_html_document
+
 
 
 
