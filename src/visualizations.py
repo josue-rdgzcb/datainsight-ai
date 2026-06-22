@@ -8,8 +8,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.stats import f_oneway, chi2_contingency
-from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
-
 
 # --------------------------------------------------
 # Plot Numerical Distributions (Boxplot Grid)
@@ -122,7 +120,7 @@ def plot_categorical_distributions(df: pd.DataFrame) -> go.Figure | None:
         counts.columns = [col, 'count']
         
         # Create vertical bar chart for each categorical variable
-        bar_fig = px.bar(counts, x=col, y='count', color=col)
+        bar_fig = px.bar(counts, x=col, y='count', color=col, color_discrete_sequence=["#0b61a4"])
         
         # Add traces from Plotly Express figure into subplot grid
         for trace in bar_fig.data:
@@ -171,6 +169,7 @@ def plot_missing_values(df: pd.DataFrame) -> go.Figure | None:
         x=missing.index,
         y=missing.values,
         labels={"x": "Column", "y": "Missing (%)"},
+        color_discrete_sequence=["#0b61a4"],
         title="Missing Values by Column"
     )
 
@@ -203,7 +202,15 @@ def plot_correlation_heatmap(df: pd.DataFrame) -> go.Figure | None:
         corr_matrix,
         text_auto=".2f",   # Show correlation values with 2 decimal precision
         aspect="auto",     # Adjust aspect ratio automatically
-        title="Correlation Heatmap"
+        title="Correlation Heatmap",
+        color_continuous_scale="RdBu",   
+        zmin=-1, zmax=1,                 
+        template="plotly_white"
+    )
+
+    fig.update_layout(
+        margin=dict(t=60, b=40, l=40, r=40),
+        coloraxis_colorbar=dict(title="Correlation")
     )
 
     # Return figure for visualization
@@ -235,7 +242,8 @@ def plot_target_distribution(df: pd.DataFrame, target: str) -> go.Figure | None:
             df,
             x=target,
             nbins=30,  # Default bin count for continuous distribution
-            title=f"{target} Distribution"
+            title=f"{target} Distribution",
+            color_discrete_sequence=["#0b61a4"]
         )
         return fig
 
@@ -251,7 +259,8 @@ def plot_target_distribution(df: pd.DataFrame, target: str) -> go.Figure | None:
         counts,
         x=target,
         y="count",
-        title=f"{target} Distribution"
+        title=f"{target} Distribution",
+        color_discrete_sequence=["#0b61a4"]
     )
 
     # Return figure for visualization
@@ -283,7 +292,8 @@ def plot_categorical_cardinality(df: pd.DataFrame) -> go.Figure | None:
         x=cardinality.index,
         y=cardinality.values,
         labels={"x": "Categorical Variable", "y": "Unique Values"},
-        title="Categorical Variables Cardinality"
+        title="Categorical Variables Cardinality",
+        color_discrete_sequence=["#0b61a4"]
     )
 
     # eturn figure for visualization
