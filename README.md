@@ -95,7 +95,7 @@ Para ejecutar esta aplicación localmente o desplegarla en un servidor privado, 
    3. Después de seleccionar tu variable objetivo se generará un EDA automático y visualizaciones en la página principal.
    4. Para utilizar la funcionalidad de análisis con IA, ingresa tu OpenAI API Key en el panel de configuración de la barra lateral izquierda.
    5. Haz clic en **"✨ Analyze with AI"** para activar la integración de análisis con Inteligencia Artificial (OpenAI).
-   6. (Opcional) Descarga los reportes generados desde el Report Export  en formato `html`
+   6. (Opcional) Descarga los reportes generados desde el Report Export Center en formato `.html`
 
 ---
 
