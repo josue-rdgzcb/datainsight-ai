@@ -60,7 +60,7 @@ if allow_ai and has_df and has_target_shared and has_api_key:
                 from src.ai_generate_analysis import generate_dataset_analysis
                 from openai import AuthenticationError
                 
-                st.write('🤖 Processing statistical patterns and drafting data science strategy report...')
+                st.write('💻 Processing statistical patterns and drafting strategy report...')
                 # 3. Transmit payload over HTTPS to request the custom markdown analytical file
                 reporte_markdown = generate_dataset_analysis(
                     profile=profile_data,
