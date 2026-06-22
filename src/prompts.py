@@ -38,6 +38,8 @@ Each section must be clearly separated, written in fluid prose, and include stru
   - **Numerical target:** Detect skewness, extreme outliers, or non-continuous distributions.
 - Explicitly state if the target distribution may cause instability in training (e.g., highly imbalanced classes, skewed regression target).
 - Recommend corrective actions (e.g., resampling for imbalance, log-transform for skew, binning if appropriate).
+- If there is no target variable, ignore this section and do not comment. Skip to the next one.
+
 
 5. ### ⚙️ Feature Engineering Suggestions
 
@@ -63,28 +65,71 @@ Each section must be clearly separated, written in fluid prose, and include stru
   - **Numerical target:** Recommend transformations if needed (e.g., log for high skew, scaling for regression tasks).
   - **Multiclass vs binary:** Explicitly state how the target should be handled in classification tasks, ensuring compatibility with common ML frameworks.
 - Always explain why the chosen transformation improves model learning or stability.
+- If there is no target variable, ignore this section and do not comment. Skip to the next one.
 
 6. ### 💻 Recommended Machine Learning Models
 
 - If a target variable exists (supervised learning):
   - Explicitly state whether the task is **Classification** or **Regression**.
   - Recommend 2–3 specific algorithms suited to the dataset (e.g., Logistic Regression, Random Forest, Gradient Boosting for classification; Linear Regression, Random Forest Regressor, XGBoost for regression).
-  - Tailor preprocessing pipeline suggestions to detected metrics (outliers, collinearity, cardinality, skewness).
+  - For each algorithm, specify:
+    - **Strengths** (interpretability, scalability, robustness to outliers).
+    - **Limitations** (sensitivity to collinearity, need for feature scaling, risk of overfitting).
+    - **Preprocessing requirements** (e.g., scaling, encoding, handling skew).
   - Explain why each model is appropriate for the dataset structure and target distribution.
 
 - If no target variable exists (unsupervised learning):
-  - Recommend 2–3 specific unsupervised algorithms (e.g., K-Means, DBSCAN, Hierarchical Clustering, PCA for dimensionality reduction).
-  - Justify how these models help uncover structure, clusters, or latent patterns in the dataset.
-  - Suggest preprocessing steps that improve unsupervised performance (e.g., scaling, handling high-cardinality categorical variables).
+  - Recommend 2–3 specific unsupervised algorithms (e.g., K-Means, DBSCAN, Hierarchical Clustering, PCA).
+  - For each algorithm, specify:
+    - **Use case** (segmentation, anomaly detection, dimensionality reduction).
+    - **Sensitivity** (to noise, outliers, scaling).
+    - **Interpretability** (cluster centroids, density regions, principal components).
+  - Justify how these models uncover structure, clusters, or latent patterns in the dataset.
 
 - In all cases:
   - Provide clear rationale for each recommendation, linking model choice to dataset characteristics.
   - Highlight trade-offs (interpretability vs performance, scalability vs accuracy).
 
-7. ### 🚀 Next Steps
-   - List concrete, prioritized actions to move this project from EDA to a production-ready baseline.
+7. ### 📏 Model Evaluation & Metrics
+- **Classification:** Accuracy, Precision, Recall, F1-score, ROC-AUC. Explicitly mention class imbalance adjustments (e.g., weighted metrics).
+- **Regression:** R², RMSE, MAE, MAPE. Flag skew or heteroscedasticity issues.
+- **Clustering:** Silhouette Score, Davies–Bouldin Index, Calinski–Harabasz Index. Recommend visual validation (e.g., cluster plots, PCA projections).
+- **Dimensionality Reduction:** Variance explained ratio, reconstruction error.
+- Always explain why the chosen metric is appropriate for the dataset, problema and task.
+
+8. ### 🚀 Next Steps
+List concrete, prioritized actions to move this project from EDA to a production-ready baseline. Each step must include rationale and expected impact.
+
+   1. **Data Cleaning**
+      - Convert string representations of numerical columns to appropriate data types.
+      - Handle missing values, duplicates, and outliers with explicit strategies (imputation, removal, winsorization).
+      - Flag and drop identifier-like columns (e.g., CustomerID) that add no predictive power.
+
+   2. **Feature Engineering**
+      - Apply the recommended transformations for numerical and categorical features.
+      - Implement domain-specific new feature creation to enhance explanatory power.
+      - Ensure target variable treatment is handled separately (encoding, log-transform, resampling if imbalanced).
+
+   3. **Model Selection**
+      - If target exists: recommend supervised models (classification or regression) aligned with dataset characteristics.
+      - If no target exists: recommend unsupervised models (clustering, dimensionality reduction).
+      - For each model, specify preprocessing requirements and trade-offs.
+
+   4. **Model Evaluation & Validation**
+      - Define evaluation metrics appropriate to the task:
+      - Classification → Accuracy, F1, ROC-AUC.
+      - Regression → RMSE, MAE, R².
+      - Clustering → Silhouette Score, Davies–Bouldin Index.
+      - Validate results with both quantitative metrics and qualitative inspection (plots, cluster interpretability).
+
+   5. **Pipeline & Documentation**
+      - Build a reproducible pipeline (data cleaning → feature engineering → modeling → evaluation).
+      - Document all preprocessing, modeling, and validation steps for transparency and future iteration.
+      - Highlight limitations and assumptions explicitly.
+
 
 Requirements:
+- Treat identifier-like columns (e.g., CustomerID, OrderID, TransactionID, UserID, URL, ID, etc) as non-predictive metadata. Do not overanalyze or include them in correlation, feature engineering, or modeling recommendations. Explicitly flag them as structural identifiers to be excluded from the modeling matrix.
 - Do not assign a title to the report. The first title should be ### 📊 Executive Summary
 - Be strictly practical, technical, and concise. Avoid generic fluff.
 - Adapt ALL recommendations contextually depending on whether a target variable exists or not.
