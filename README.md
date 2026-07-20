@@ -128,3 +128,18 @@ To run this application locally or deploy it on a private server, you need:
 
 - **Report Generation:** HTML export with Markdown2 + Plotly (offline interactive reports)
 
+---
+
+## 💻 Future Improvements
+
+- **Interactive Data Chat (AI Agent):** Upgrading the UI to include a chat interface where users can ask custom questions about the dataset, using an AI Agent to dynamically query the data.
+- **One-Click Jupyter Notebook Export:** Allowing users to download the complete analysis, including the source code for the Plotly charts and Pandas transformations, as a `.ipynb` file to continue workflows locally.
+- **Executive PDF Report Generation:** Expanding the export center to generate highly polished, print-ready PDF reports combining AI summaries and static chart snapshots.
+- **Local LLM Ecosystem (Ollama):** Adding support for local open-source models (like Llama 3) to allow enterprise users to analyze sensitive data completely offline.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
