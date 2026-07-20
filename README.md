@@ -1,18 +1,33 @@
 # DataInsight AI 🧠🤖
 
-**DataInsight AI** is an **Artificial Intelligence** powered assistant that combines automated analysis with interactive visualization. Built on top of a **Streamlit** interface, it is designed to generate an automatic **Exploratory Data Analysis (EDA)** from any CSV file and deliver **immediate AI-assisted insights**. 
+**DataInsight AI** is an AI-powered assistant that combines automated analysis with interactive visualization. Built on top of a **Streamlit** interface, it is designed to generate an automatic **Exploratory Data Analysis (EDA)** from any CSV file and deliver **immediate AI-assisted insights**. 
 
 The platform processes dataset variables, generates an automated EDA, creates instant interactive charts, and uses an AI module (OpenAI) to analyze data structure and write:
 
-- **Key insights** regarding dataset behavior  
-- **Quality alerts** and consistency issues
-- **Relevant correlations** between variables
-- **Feature engineering** recommendations
+- **Key insights** regarding dataset behavior   
+
+- **Quality alerts** and consistency issues  
+
+- **Relevant correlations** between variables  
+
+- **Feature engineering** recommendations  
+
 - **Model suggestions based on the learning approach:** supervised (regression or classification) when a target variable is selected, and unsupervised (clustering) when no target is defined.
 
 This way, **DataInsight AI** blends immediate visualization with automated interpretation, offering an agile, assisted workflow for analysts, data scientists, and engineers looking to **accelerate initial data exploration**.
 
 
+---
+
+## 🚀 Live Demo
+
+**Try the application here:**
+
+👉 https://datainsight-ai-assistant.streamlit.app/
+
+<p align="center">
+    <img src="assets/demo.gif">
+</p>
 
 ---
 
