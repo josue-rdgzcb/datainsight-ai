@@ -1,112 +1,115 @@
 # DataInsight AI 🧠🤖
 
-**DataInsight AI** es un asistente impulsado por **Inteligencia Artificial** que combina análisis automático y visualización interactiva. Construido sobre una interfaz de **Streamlit**, está diseñado para generar un **Exploratory Data Analysis (EDA)** automático a partir de cualquier archivo CSV y ofrecer **insights inmediatos asistidos por IA**.
+**DataInsight AI** is an **Artificial Intelligence** powered assistant that combines automated analysis with interactive visualization. Built on top of a **Streamlit** interface, it is designed to generate an automatic **Exploratory Data Analysis (EDA)** from any CSV file and deliver **immediate AI-assisted insights**. 
 
-La plataforma procesa las variables del dataset, genera un EDA automático, crea gráficos interactivos instantáneos y utiliza un módulo de inteligencia artificial (OpenAI) para analizar la estructura de los datos y redactar:
+The platform processes dataset variables, generates an automated EDA, creates instant interactive charts, and uses an AI module (OpenAI) to analyze data structure and write:
 
-- **Key insights** sobre el comportamiento del dataset
+- **Key insights** regarding dataset behavior  
+- **Quality alerts** and consistency issues
+- **Relevant correlations** between variables
+- **Feature engineering** recommendations
+- **Model suggestions based on the learning approach:** supervised (regression or classification) when a target variable is selected, and unsupervised (clustering) when no target is defined.
 
-- **Alertas de calidad** y problemas de consistencia
+This way, **DataInsight AI** blends immediate visualization with automated interpretation, offering an agile, assisted workflow for analysts, data scientists, and engineers looking to **accelerate initial data exploration**.
 
-- **Correlaciones** relevantes entre variables
-
-- **Recomendaciones de feature engineering**
-
-- **Sugerencias de modelos según el enfoque de aprendizaje:** supervisado (regresión o clasificación) cuando se selecciona un target, y no supervisado (clustering) cuando no se define un target.
-
-De esta forma, **DataInsight AI** combina visualización inmediata con interpretación automática, ofreciendo un flujo de trabajo ágil y asistido para analistas, científicos de datos e ingenieros que buscan **acelerar la exploración inicial** de sus datasets.
 
 
 ---
 
-## 🚀 Funcionalidades Clave
+## 🚀 Key Features
 
-- **EDA automático:** Generación instantánea de un Exploratory Data Analysis a partir de cualquier archivo CSV.
+- **Automated EDA:** Instant generation of an Exploratory Data Analysis from any CSV file.
 
-- **Visualización interactiva:** Gráficos dinámicos y personalizables con Streamlit + Plotly, listos para explorar relaciones entre variables.
+- **Interactive Visualization:** Dynamic and customizable charts using Streamlit + Plotly, ready to explore relationships between variables.
 
-- **Narrativa automática:** Resúmenes fluidos en lenguaje natural que convierten estadísticas en insights comprensibles.
+- **Automated Narrative:** Fluid natural language summaries that convert statistics into easily understandable insights.
 
-- **Alertas de calidad de datos:** Identificación de valores faltantes, duplicados y problemas de consistencia.
+- **Data Quality Alerts:** Identification of missing values, duplicates, and consistency issues.
 
-- **Insights generados por IA:**  El módulo de OpenAI redacta hallazgos clave, problemas de calidad y correlaciones relevantes.
+- **AI-Generated Insights:** The OpenAI module writes key findings, quality problems, and relevant correlations.
 
-- **Recomendaciones de feature engineering**: 
-    - Estrategias automáticas y específicas para transformar variables numéricas (log, escalado, polinomiales).
-    - Estrategias para codificar categóricas de alta cardinalidad (target/frequency encoding).
-    - Propuestas de nuevas features con potencial poder explicativo, incluyendo integraciones externas según el dominio del dataset.
+- **Feature Engineering Recommendations**: 
+    - Automated and specific strategies to transform numerical variables (log, scaling, polynomial).
+    - Strategies to encode high-cardinality categorical variables (target/frequency encoding).
+    - Proposals for new features with potential explanatory power, including external integrations based on the dataset domain.
 
-- **Sugerencia de modelado:** Recomendaciones alineadas con el aprendizaje supervisado (regresión o clasificación cuando se define un target) y con el aprendizaje no supervisado (clustering cuando no se dispone de un target).
+- **Modeling Suggestions:** Recommendations aligned with supervised learning (regression or classification when a target is defined) and unsupervised learning (clustering when no target is available).
 
-- **Exportación de reportes HTML:** Generación de documentos interactivos en formato `.html`, autocontenidos y utilizables sin conexión, que incluyen métricas, visualizaciones y análisis generado por IA.
+- **HTML Report Export:** Generation of interactive `.html` documents, self-contained and usable offline, including metrics, visualizations, and AI-generated analysis.
 
----
-
-## 🛠️ Requisitos Previos
-
-Para ejecutar esta aplicación localmente o desplegarla en un servidor privado, necesitas:
-- **Python 3.10** o superior instalado en tu sistema.
-- Una **OpenAI API Key** válida (Asegúrate de que tu cuenta de desarrollador de OpenAI cuente con saldo/créditos de uso disponibles).
 
 ---
 
-## 📦 Instalación
+## 🛠️ Prerequisites
 
-1. **Clona el repositorio** o navega hasta la carpeta del proyecto en tu terminal:
+To run this application locally or deploy it on a private server, you need:
+- **Python 3.10** or higher installed on your system.
+- A valid **OpenAI API Key** (Make sure your OpenAI developer account has usage balance/credits available).
+
+
+---
+
+## 📦 Installation
+
+1. **Clone the repository** or navigate to the project folder in your terminal:
    ```bash
    git clone https://github.com/josue-rdgzcb/datainsight-ai.git
    cd datainsight-ai
    ```
 
-2. **Crea un entorno virtual** para aislar las dependencias del sistema de forma segura:
+2. **Create a virtual environment** to isolate system dependencies safely:
    ```bash
    python -m venv venv
-   source venv/bin/activate  # En macOS/Linux
-   # venv\Scripts\activate   # En Windows
+   source venv/bin/activate  # On macOS/Linux
+   # venv\Scripts\activate   # On Windows
    ```
 
-3. **Instala los paquetes requeridos** utilizando el archivo de dependencias estructurado:
+3. **Install the required packages** using the structured dependency file:
    ```bash
    pip install -r requirements.txt
    ```
-4. **(Opcional)** Verifica la instalación de dependencias y versiones con el script incluido:
-      ```bash
+4. **(Optional)** Verify dependency installation and versions with the included script:
+   ```bash
    python check_requirements.py
    ```
 
 
+
 ---
 
-## ▶️ Uso
+## ▶️ Usage
 
-1. Inicia la plataforma ejecutando el punto de entrada principal del orquestador:
+1. Start the platform by running the main orchestrator entry point:
    ```bash
    streamlit run app.py
    ```
-   *Nota: Si ejecutas Streamlit por primera vez, puedes presionar **Enter** para omitir el paso opcional de registro de correo electrónico.* 
+   *Note: If you are running Streamlit for the first time, you can press **Enter** to skip the optional email registration step.* 
 <br> 
 
-2. La aplicación se abrirá automáticamente en tu navegador web predeterminado (usualmente en `http://localhost:8501`).
+2. The application will automatically open in your default web browser (usually at `http://localhost:8501`).
 <br>
-3. **En la interfaz:**
 
-   1. Importa o arrastra y suelta cualquier dataset estructurado en formato CSV.
-   2. Selecciona tu variable objetivo / target (o 'None' para un EDA no supervisado general).
-   3. Después de seleccionar tu variable objetivo se generará un EDA automático y visualizaciones en la página principal.
-   4. Para utilizar la funcionalidad de análisis con IA, ingresa tu OpenAI API Key en el panel de configuración de la barra lateral izquierda.
-   5. Haz clic en **"✨ Analyze with AI"** para activar la integración de análisis con Inteligencia Artificial (OpenAI).
-   6. (Opcional) Descarga los reportes generados desde el Report Export Center en formato `.html`
+3. **In the interface:**
+
+   1. Import or drag and drop any structured dataset in CSV format.
+   2. Select your target variable (or 'None' for a general unsupervised EDA).
+   3. After selecting your target variable, an automated EDA and visualizations will be generated on the main page.
+   4. To use the AI analysis features, enter your OpenAI API Key in the settings panel located in the left sidebar.
+   5. Click on **"✨ Analyze with AI"** to activate the Artificial Intelligence analysis integration (OpenAI).
+   6. (Optional) Download the generated reports from the Report Export Center in `.html` format.
+
 
 ---
 
-## 📚 Tecnologías y Arquitectura
+## 📚 Technologies and Architecture
 
-- **Framework e Interfaz Web:** Streamlit (v1.35.0+)
+- **Framework and Web Interface:** Streamlit (v1.35.0+)
 
-- **Manipulación y análisis de datos:** Pandas, NumPy, SciPy
+- **Data Manipulation and Analysis:** Pandas, NumPy, SciPy
 
-- **Visualización interactiva:** Plotly
+- **Interactive Visualization:** Plotly
 
-- **Motor de IA:** OpenAI Python SDK + dotenv
+- **AI Engine:** OpenAI Python SDK + dotenv
 
-- **Generación de reportes:** Exportación en HTML con Markdown2 + Plotly (reportes interactivos sin conexión)
+- **Report Generation:** HTML export with Markdown2 + Plotly (offline interactive reports)
+
