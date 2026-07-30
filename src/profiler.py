@@ -291,7 +291,7 @@ def generate_data_summary(
     dup_text = (
         "Fortunately, **no duplicate records** were detected."
         if dup_count == 0 else
-        f"Additionally, **{dup_count:,} duplicate rows** were found, which should be handled to prevent data leakage."
+        f"Additionally, **{dup_count:,} duplicate rows** were found"
     )
     
     summary.append(f"**Data Quality & Integrity:** {missing_text} {dup_text}")
@@ -323,3 +323,47 @@ def generate_data_summary(
 
     # Join the textual sequence tracks into a uniform markdown narrative structure
     return "\n\n".join(summary)
+
+
+# --------------------------------------------------
+# Detection of high-cardinality variables
+# --------------------------------------------------
+def detect_high_cardinality_features(
+    df: pd.DataFrame,
+    threshold: float = 0.30
+) -> list[str]:
+    """
+    Detect categorical columns with high cardinality.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+
+    threshold : float
+        Minimum unique ratio to consider
+        a feature high-cardinality.
+
+    Returns
+    -------
+    list[str]
+    """
+
+    high_cardinality = []
+
+    categorical_columns = df.select_dtypes(
+        exclude="number"
+    ).columns
+
+    n_rows = len(df)
+
+    for col in categorical_columns:
+
+        unique_ratio = (
+            df[col].nunique(dropna=True)
+            / n_rows
+        )
+
+        if unique_ratio >= threshold:
+            high_cardinality.append(col)
+
+    return high_cardinality
