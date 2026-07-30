@@ -7,7 +7,16 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from scipy.stats import f_oneway, chi2_contingency
+
+from sklearn.compose import ColumnTransformer
+from sklearn.feature_selection import (
+    mutual_info_classif,
+    mutual_info_regression
+)
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+
 
 # --------------------------------------------------
 # Plot Numerical Distributions (Boxplot Grid)
@@ -350,241 +359,239 @@ def generate_variable_summary_table(df: pd.DataFrame) -> pd.DataFrame:
     # Return summary DataFrame
     return summary
 
-
 # --------------------------------------------------
-# Plot Target Correlations (Predictive Association Analysis)
+# Feature Importance Analysis
 # --------------------------------------------------
 
-def plot_target_correlations(df: pd.DataFrame, target: str) -> go.Figure | None:
+def plot_feature_relevance(
+    df: pd.DataFrame,
+    target: str,
+    top_n: int = 10
+) -> go.Figure | None:
     """
-    Calculate the predictive association strength between features and the target.
-    Automatically detects if the target should be treated as continuous (regression)
-    or discrete classes (classification, e.g., Titanic Survived).
-    """
+    Generate feature relevance analysis based on the selected target.
 
-    # Validate target input
-    if not target or target not in df.columns:
-        return None
+    Classification:
+    Uses Mutual Information Classification.
 
-    features_importance = []
-    
-    # Detect target type
-    # If numeric but with ≤10 unique values (e.g., 0/1), treat as categorical
-    is_target_numeric = pd.api.types.is_numeric_dtype(df[target])
-    if is_target_numeric and df[target].nunique() <= 10:
-        is_target_numeric = False  # Force classification flow
+    Regression:
+    Uses Mutual Information Regression.
 
-    # --- SCENARIO A: CLASSIFICATION CONTEXT ---
-    if not is_target_numeric:
-        target_classes = df[target].dropna().unique()
-        if len(target_classes) < 2:
-            return None
-
-        for col in df.columns:
-            if col == target:
-                continue
-                
-            # Numerical feature vs categorical target → ANOVA
-            if pd.api.types.is_numeric_dtype(df[col]):
-                groups = [df[df[target] == c][col].dropna() for c in target_classes]
-                groups = [g for g in groups if len(g) > 0]
-                
-                if len(groups) > 1:
-                    f_stat, p_val = f_oneway(*groups)
-                    strength = 1.0 - p_val if not np.isnan(p_val) else 0.0
-                    features_importance.append({
-                        "Feature": col,
-                        "Association Power": min(1.0, max(0.0, strength)),
-                        "Type": "Numerical (ANOVA)"
-                    })
-
-            # Categorical feature vs categorical target → Chi-Square
-            else:
-                contingency_table = pd.crosstab(df[col], df[target])
-                if contingency_table.size > 1:
-                    chi2, p_val, dof, expected = chi2_contingency(contingency_table)
-                    strength = 1.0 - p_val
-                    features_importance.append({
-                        "Feature": col,
-                        "Association Power": min(1.0, max(0.0, strength)),
-                        "Type": "Categorical (Chi2)"
-                    })
-
-    # --- SCENARIO B: REGRESSION CONTEXT ---
-    else:
-        numerical_df = df.select_dtypes(include="number")
-        if numerical_df.shape[1] >= 2:
-            correlations = numerical_df.corr(numeric_only=True)[target].drop(target).abs()
-            for col, val in correlations.items():
-                features_importance.append({
-                    "Feature": col,
-                    "Association Power": val,
-                    "Type": "Numerical (Pearson)"
-                })
-
-    # Build results DataFrame
-    res_df = pd.DataFrame(features_importance)
-    if res_df.empty:
-        return None
-        
-    res_df = res_df.sort_values(by="Association Power", ascending=True)
-
-    # Create interactive bar chart
-    title_suffix = "Classification Context" if not is_target_numeric else "Regression Context"
-    fig = px.bar(
-        res_df,
-        x="Association Power",
-        y="Feature",
-        color="Type",  # Color by statistical method
-        orientation="h",
-        title=f"Feature Predictive Association with Target: '{target}' ({title_suffix})",
-        labels={"Association Power": "Statistical Association Score (Higher = Stronger Relationship)"},
-        color_discrete_map={
-            "Numerical (ANOVA)": "#0b61a4",
-            "Categorical (Chi2)": "#2e7d32",
-            "Numerical (Pearson)": "#475569"
-        }
-    )
-
-    # Layout adjustments
-    fig.update_layout(
-        template="plotly_white",
-        height=max(300, len(res_df) * 45),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-    )
-    
-    return fig
-
-# --------------------------------------------------
-# Plot Target Correlations (Predictive Association Analysis)
-# --------------------------------------------------
-
-def plot_target_correlations_2(df: pd.DataFrame, target: str) -> go.Figure | None:
-    """
-    Calculate the predictive association strength between features and the target.
-    Automatically detects if the target should be treated as continuous (regression)
-    or discrete classes (classification, e.g., Titanic Survived).
+    Handles:
+    - Numerical features
+    - Categorical features
+    - Missing values
 
     Parameters
     ----------
     df : pd.DataFrame
         Input dataset.
+
     target : str
-        Target column name.
+        Target variable.
+
+    top_n : int
+        Number of top features displayed.
 
     Returns
     -------
     go.Figure | None
-        Plotly figure showing association statistics, or None if not applicable.
+        Plotly feature importance chart.
     """
 
-    # Validate target input
-    if not target or target not in df.columns:
+    # Validate target
+    if target is None or target not in df.columns:
         return None
 
-    features_importance = []
-    
-    # Detect target type
-    is_target_numeric = pd.api.types.is_numeric_dtype(df[target])
-    if is_target_numeric and df[target].nunique() <= 10:
-        is_target_numeric = False  # Force classification flow
 
-    # --- SCENARIO A: CLASSIFICATION CONTEXT ---
-    if not is_target_numeric:
-        target_classes = df[target].dropna().unique()
-        if len(target_classes) < 2:
-            return None
+    # Copy dataframe
+    data = df.copy()
 
-        for col in df.columns:
-            if col == target:
-                continue
-                
-            # Numerical feature vs categorical target → ANOVA
-            if pd.api.types.is_numeric_dtype(df[col]):
-                groups = [df[df[target] == c][col].dropna() for c in target_classes]
-                groups = [g for g in groups if len(g) > 0]
-                
-                if len(groups) > 1:
-                    f_stat, p_val = f_oneway(*groups)
-                    features_importance.append({
-                        "Feature": col,
-                        "Statistic": f_stat,
-                        "p_value": p_val,
-                        "Type": "Numerical (ANOVA)"
-                    })
 
-            # Categorical feature vs categorical target → Chi-Square
-            else:
-                contingency_table = pd.crosstab(df[col], df[target])
-                if contingency_table.size > 1:
-                    chi2, p_val, dof, expected = chi2_contingency(contingency_table)
-                    features_importance.append({
-                        "Feature": col,
-                        "Statistic": chi2,
-                        "p_value": p_val,
-                        "Type": "Categorical (Chi2)"
-                    })
+    # Remove rows where target is missing
+    data = data.dropna(subset=[target])
 
-    # --- SCENARIO B: REGRESSION CONTEXT ---
-    else:
-        numerical_df = df.select_dtypes(include="number")
-        if numerical_df.shape[1] >= 2:
-            # Pearson correlation
-            pearson_corr = numerical_df.corr(numeric_only=True)[target].drop(target)
-            for col, val in pearson_corr.items():
-                features_importance.append({
-                    "Feature": col,
-                    "Statistic": val,
-                    "p_value": None,  # Pearson correlation does not directly provide p-value here
-                    "Type": "Numerical (Pearson)"
-                })
-            # Spearman correlation
-            spearman_corr = numerical_df.corr(method="spearman")[target].drop(target)
-            for col, val in spearman_corr.items():
-                features_importance.append({
-                    "Feature": col,
-                    "Statistic": val,
-                    "p_value": None,  # Spearman correlation does not directly provide p-value here
-                    "Type": "Numerical (Spearman)"
-                })
+    if data.empty:
 
-    # Build results DataFrame
-    res_df = pd.DataFrame(features_importance)
-    if res_df.empty:
         return None
-        
-    # Sort by absolute statistic for ranking
-    res_df = res_df.sort_values(by="Statistic", ascending=True)
 
-    # Create interactive bar chart
-    title_suffix = "Classification Context" if not is_target_numeric else "Regression Context"
-    fig = px.bar(
-        res_df,
-        x="Statistic",
-        y="Feature",
-        color="Type",
-        orientation="h",
-        title=f"Feature Association with Target: '{target}' ({title_suffix})",
-        labels={"Statistic": "Association Statistic (magnitude)"},
-        color_discrete_map={
-            "Numerical (ANOVA)": "#0b61a4",
-            "Categorical (Chi2)": "#2e7d32",
-            "Numerical (Pearson)": "#475569",
-            "Numerical (Spearman)": "#9c27b0"
-        },
-        hover_data=["p_value"]  # Show p-value in tooltip when available
+
+    X = data.drop(columns=[target])
+
+    y = data[target]
+
+
+    # --------------------------------------------------
+    # Detect problem type
+    # --------------------------------------------------
+
+    is_classification = (not pd.api.types.is_numeric_dtype(y) or y.nunique() <= 10)
+
+    # --------------------------------------------------
+    # Detect feature types
+    # --------------------------------------------------
+
+    categorical_features = (
+        X.select_dtypes(exclude="number").columns.tolist()
     )
 
-    # Layout adjustments
+    numerical_features = (
+        X.select_dtypes(include="number").columns.tolist()
+    )
+
+
+    if (len(categorical_features) == 0 and len(numerical_features) == 0):
+
+        return None
+
+
+    # --------------------------------------------------
+    # Preprocessing pipeline
+    # --------------------------------------------------
+
+    transformers = []
+
+
+    if categorical_features:
+
+        categorical_pipeline = Pipeline(
+            steps=[
+                ("imputer", SimpleImputer(strategy="most_frequent")),
+                ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
+            ]
+        )
+
+        transformers.append(
+            ("categorical", categorical_pipeline, categorical_features)
+        )
+
+
+    if numerical_features:
+
+        numerical_pipeline = Pipeline(
+            steps=[
+                ("imputer", SimpleImputer(strategy="median"))
+            ]
+        )
+
+        transformers.append(
+            ("numerical", numerical_pipeline, numerical_features)
+        )
+
+
+    preprocessor = ColumnTransformer(transformers=transformers)
+
+    X_encoded = preprocessor.fit_transform(X)
+
+    feature_names = (preprocessor.get_feature_names_out())
+
+    # --------------------------------------------------
+    # Calculate importance
+    # --------------------------------------------------
+
+    if is_classification:
+
+        importance = mutual_info_classif(X_encoded, y, random_state=42)
+
+        title = (f"Top Predictive Features for '{target}'")
+
+
+    else:
+
+        importance = mutual_info_regression(X_encoded, y, random_state=42)
+
+        title = (f"Top Relevant Features for '{target}'")
+
+
+    # --------------------------------------------------
+    # Build importance dataframe
+    # --------------------------------------------------
+
+    importance_df = pd.DataFrame(
+        {
+            "Encoded Feature": feature_names,
+            "Importance": importance
+        }
+    )
+
+
+    def get_original_feature(encoded_name: str) -> str:
+        """
+        Recover the original feature name after preprocessing.
+        """
+
+        # Numerical features
+        if encoded_name.startswith("numerical__"):
+            return encoded_name.replace(
+                "numerical__",
+                ""
+            )
+
+        # Categorical features
+        if encoded_name.startswith("categorical__"):
+
+            feature = encoded_name.replace(
+                "categorical__",
+                ""
+            )
+
+            # Find which original categorical feature generated it
+            for col in categorical_features:
+                prefix = f"{col}_"
+
+                if feature.startswith(prefix):
+                    return col
+
+            return feature
+
+        return encoded_name
+
+
+    importance_df["Feature"] = (
+        importance_df["Encoded Feature"]
+        .apply(get_original_feature)
+    )
+
+
+    importance_df = (importance_df.groupby("Feature", as_index=False)["Importance"].sum())
+
+
+    importance_df = (importance_df[importance_df["Importance"] > 0].sort_values(by="Importance", ascending=False).head(top_n))
+
+
+    # --------------------------------------------------
+    # Plot
+    # --------------------------------------------------
+
+    importance_df = (
+        importance_df
+        .sort_values(
+            by="Importance",
+            ascending=True
+        )
+    )
+
+
+    fig = px.bar(
+        importance_df,
+        x="Importance",
+        y="Feature",
+        orientation="h",
+        title=title,
+        labels={
+            "Importance": "Mutual Information Score",
+            "Feature": ""
+        }
+    )
+
+
     fig.update_layout(
         template="plotly_white",
-        height=max(300, len(res_df) * 45),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        height=max(
+            400,
+            len(importance_df) * 40
+        )
     )
-    
+
+
     return fig
-
-
-
-
-
