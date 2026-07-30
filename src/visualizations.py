@@ -491,17 +491,31 @@ def plot_feature_relevance(
 
     if is_classification:
 
-        importance = mutual_info_classif(X_encoded, y, random_state=42)
+        importance = mutual_info_classif(
+            X_encoded,
+            y,
+            random_state=42
+        )
 
-        title = (f"Top Predictive Features for '{target}'")
-
+        method = "Mutual Information Classification"
 
     else:
 
-        importance = mutual_info_regression(X_encoded, y, random_state=42)
+        importance = mutual_info_regression(
+            X_encoded,
+            y,
+            random_state=42
+        )
 
-        title = (f"Top Relevant Features for '{target}'")
+        method = "Mutual Information Regression"
 
+
+    title = (
+        f"Feature Relevance Analysis"
+        f"<br><sup>"
+        f"Target: {target} | Method: {method}"
+        f"</sup>"
+    )
 
     # --------------------------------------------------
     # Build importance dataframe
