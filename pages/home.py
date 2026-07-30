@@ -6,7 +6,11 @@ import streamlit as st
 import pandas as pd
 
 from src.loader import load_csv
-from src.profiler import profile_dataset, generate_data_summary
+from src.profiler import (
+    profile_dataset, 
+    generate_data_summary,
+    detect_high_cardinality_features
+)
 
 from src.visualizations import (
     plot_numerical_distributions,
@@ -457,6 +461,18 @@ if uploaded_file is not None:
                 with st.container(border=True):
 
                     st.markdown("📊 Most Relevant Features")
+
+                    high_cardinality = detect_high_cardinality_features(df)
+
+                    if high_cardinality:
+
+                        st.info(
+                            "⚠️ *High-cardinality categorical features detected:* "
+                            f"{', '.join(high_cardinality)}.\n\n"
+                            "These variables contain many unique values, so their importance "
+                            "scores may be artificially inflated. Consider feature engineering "
+                            "or excluding identifier-like columns before model training."
+                        )
 
                     fig_relevance = plot_feature_relevance(df, selected_target)
 
