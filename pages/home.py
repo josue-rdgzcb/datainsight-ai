@@ -16,8 +16,7 @@ from src.visualizations import (
     plot_target_distribution,
     plot_categorical_cardinality,
     generate_variable_summary_table,
-    plot_target_correlations,
-    plot_target_correlations_2,
+    plot_feature_relevance
 )
 
 # --------------------------------------------------
@@ -434,35 +433,35 @@ if uploaded_file is not None:
 
         # --- TAB 4: TARGET ANALYSIS (Conditional Panel) ---
         if selected_target:
+
             with tabs[3]:
-                # Inspect how rows group, spread, or separate based on target boundaries
+
+                # -------------------------------
+                # Target Distribution
+                # -------------------------------
+
                 with st.container(border=True):
 
                     st.markdown(f"🎯 Target Distribution (`{selected_target}`)")
+
                     fig_target = plot_target_distribution(df, selected_target)
 
                     if fig_target:
                         st.plotly_chart(fig_target, use_container_width=True)
 
-                # Render advanced statistical evaluation (ANOVA/Pearson/Chi2) against the label
+
+                # -------------------------------
+                # Feature Relevance
+                # -------------------------------
+
                 with st.container(border=True):
 
-                    st.markdown(f"#### 🎯 Predictive Feature Power against `{selected_target}`")
-                    fig_target_corr = plot_target_correlations(df, selected_target)
+                    st.markdown("📊 Most Relevant Features")
 
-                    if fig_target_corr:
-                        st.plotly_chart(fig_target_corr, use_container_width=True)
+                    fig_relevance = plot_feature_relevance(df, selected_target)
+
+                    if fig_relevance:
+                        st.plotly_chart(fig_relevance, use_container_width=True)
+
                     else:
-                        st.info("Could not calculate independent feature relationships for this target.")
-
-                # Render advanced statistical evaluation (ANOVA/Pearson/Chi2) against the label
-                with st.container(border=True):
-
-                    st.markdown(f"#### 🎯 Predictive Feature Power against `{selected_target}`")
-                    fig_target_corr = plot_target_correlations_2(df, selected_target)
-
-                    if fig_target_corr:
-                        st.plotly_chart(fig_target_corr, use_container_width=True)
-                    else:
-                        st.info("Could not calculate independent feature relationships for this target.")
-
+                        st.info("Feature relevance could not be calculated for this target.")            
